@@ -106,12 +106,12 @@ class TemporalFusionTransformerEstimator(TimeSeriesEstimator):
     def fit(self, X_train, y_train, budget=None, **kwargs):
         import warnings
 
-        import pytorch_lightning as pl
+        import lightning.pytorch as pl
         import torch
+        from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor
+        from lightning.pytorch.loggers import TensorBoardLogger
         from pytorch_forecasting import TemporalFusionTransformer
         from pytorch_forecasting.metrics import QuantileLoss
-        from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor
-        from pytorch_lightning.loggers import TensorBoardLogger
 
         # a bit of monkey patching to fix the MacOS test
         # all the log_prediction method appears to do is plot stuff, which ?breaks github tests
@@ -132,7 +132,7 @@ class TemporalFusionTransformerEstimator(TimeSeriesEstimator):
         lr_logger = LearningRateMonitor()  # log the learning rate
         logger = TensorBoardLogger(kwargs.get("log_dir", "lightning_logs"))  # logging results to a tensorboard
         default_trainer_kwargs = dict(
-            gpus=self._kwargs.get("gpu_per_trial", [0]) if torch.cuda.is_available() else None,
+            # gpus=self._kwargs.get("gpu_per_trial", [0]) if torch.cuda.is_available() else None,
             max_epochs=max_epochs,
             gradient_clip_val=gradient_clip_val,
             callbacks=[lr_logger, early_stop_callback],
